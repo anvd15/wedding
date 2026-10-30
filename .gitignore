@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+backend/node_modules/
+
+# Next.js build output
+.next/
+out/
+
+# Env / secrets
+.env
+.env.*
+backend/.env
+
+# Raw/original photos (unresized) - not used by the site
+19 chụp thuy -an/
+
+# OS / editor
+.DS_Store
+Thumbs.db

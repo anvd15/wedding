@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thuy &amp; An — Photo Gallery 📷</title>
+  <meta name="description" content="Bộ ảnh kỷ niệm đẹp của Thuy và An." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="gallery.css?v=2" />
+</head>
+<body>
+
+  <!-- ── Header ── -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-brand">
+        <span class="brand-icon">✦</span>
+        <h1 class="brand-title">Thuy &amp; An</h1>
+        <span class="brand-icon">✦</span>
+      </div>
+      <p class="brand-sub">19 khoảnh khắc đáng nhớ</p>
+    </div>
+  </header>
+
+  <!-- ── Lightbox / Slideshow ── -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Xem ảnh phóng to">
+    <button class="lb-close" id="lbClose" aria-label="Đóng">✕</button>
+
+    <button class="lb-nav lb-prev" id="lbPrev" aria-label="Ảnh trước">&#8249;</button>
+    <button class="lb-nav lb-next" id="lbNext" aria-label="Ảnh tiếp theo">&#8250;</button>
+
+    <div class="lb-img-wrap">
+      <img class="lb-img" id="lbImg" src="" alt="" />
+      <div class="lb-loader" id="lbLoader"></div>
+    </div>
+
+    <div class="lb-bar">
+      <span class="lb-caption" id="lbCaption"></span>
+      <span class="lb-counter" id="lbCounter"></span>
+    </div>
+
+    <!-- Thumbnail strip -->
+    <div class="lb-strip" id="lbStrip"></div>
+  </div>
+
+  <!-- ── Grid ── -->
+  <main class="gallery-grid" id="galleryGrid"></main>
+
+  <!-- ── Footer ── -->
+  <footer class="site-footer">
+    <p>📷 <span id="photoCount"></span> ảnh · Click ảnh để xem toàn màn hình</p>
+  </footer>
+
+  <script src="gallery.js?v=2"></script>
+</body>
+</html>
