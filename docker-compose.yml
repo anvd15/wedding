@@ -3,6 +3,10 @@ services:
     image: mongo:7.0
     container_name: wedding_mongodb
     restart: unless-stopped
+    # Giới hạn WiredTiger cache cho máy RAM thấp (ví dụ AWS 1GB/2vCPU).
+    # Không set thì Mongo tự tính cache theo RAM tổng của máy và dễ chiếm quá nhiều,
+    # làm Next.js/Express bị OOM-kill khi cùng chạy trên 1 máy.
+    command: ["mongod", "--wiredTigerCacheSizeGB", "0.25"]
     ports:
       - "27017:27017"
     environment:

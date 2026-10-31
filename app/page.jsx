@@ -19,8 +19,8 @@ import {
 // Trỏ trực tiếp tới Backend Cloudflare HTTPS
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.anvd.dev';
 
-// Danh sách ảnh tuyển chọn từ bộ ảnh của Đức An & Bích Thủy
-const ALL_PHOTOS = [
+// Ảnh local dùng tạm trong lúc chờ API /api/photos trả dữ liệu (hoặc khi API lỗi)
+const FALLBACK_SLIDER_PHOTOS = [
   '/photos/DSC_1220.jpg',
   '/photos/DSC_1332.jpg',
   '/photos/DSC_1415.jpg',
@@ -28,6 +28,9 @@ const ALL_PHOTOS = [
   '/photos/DSC_1924.jpg',
   '/photos/DSC_2268.jpg',
 ];
+const FALLBACK_HERO_PHOTO = '/photos/DSC_1220.jpg';
+const FALLBACK_GROOM_PHOTO = '/photos/DSC_1415.jpg';
+const FALLBACK_BRIDE_PHOTO = '/photos/DSC_1332.jpg';
 
 export default function WeddingPage() {
   // Trạng thái âm nhạc
@@ -45,6 +48,14 @@ export default function WeddingPage() {
   const [sliderIndex, setSliderIndex] = useState(0);
   const [sliderPaused, setSliderPaused] = useState(false);
   const touchStartXRef = useRef(null);
+
+  // Ảnh tải từ API /api/photos (S3) - khởi tạo bằng ảnh local để không bị trống khi chờ tải
+  const [sliderPhotos, setSliderPhotos] = useState(
+    FALLBACK_SLIDER_PHOTOS.map((url) => ({ url }))
+  );
+  const [heroPhotoUrl, setHeroPhotoUrl] = useState(FALLBACK_HERO_PHOTO);
+  const [groomPhotoUrl, setGroomPhotoUrl] = useState(FALLBACK_GROOM_PHOTO);
+  const [bridePhotoUrl, setBridePhotoUrl] = useState(FALLBACK_BRIDE_PHOTO);
 
   // Form RSVP
   const [rsvpName, setRsvpName] = useState('');
@@ -202,13 +213,13 @@ export default function WeddingPage() {
   useEffect(() => {
     if (sliderPaused) return;
     const interval = setInterval(() => {
-      setSliderIndex((prev) => (prev + 1) % ALL_PHOTOS.length);
+      setSliderIndex((prev) => (prev + 1) % sliderPhotos.length);
     }, 3000);
     return () => clearInterval(interval);
-  }, [sliderPaused]);
+  }, [sliderPaused, sliderPhotos.length]);
 
   const goToSlide = (idx) => {
-    setSliderIndex(((idx % ALL_PHOTOS.length) + ALL_PHOTOS.length) % ALL_PHOTOS.length);
+    setSliderIndex(((idx % sliderPhotos.length) + sliderPhotos.length) % sliderPhotos.length);
   };
   const nextSlide = () => goToSlide(sliderIndex + 1);
   const prevSlide = () => goToSlide(sliderIndex - 1);
@@ -232,14 +243,39 @@ export default function WeddingPage() {
     const onKeyDown = (e) => {
       if (e.key === 'Escape') setLightboxOpen(false);
       else if (e.key === 'ArrowLeft') {
-        setCurrentPhotoIdx((prev) => (prev > 0 ? prev - 1 : ALL_PHOTOS.length - 1));
+        setCurrentPhotoIdx((prev) => (prev > 0 ? prev - 1 : sliderPhotos.length - 1));
       } else if (e.key === 'ArrowRight') {
-        setCurrentPhotoIdx((prev) => (prev < ALL_PHOTOS.length - 1 ? prev + 1 : 0));
+        setCurrentPhotoIdx((prev) => (prev < sliderPhotos.length - 1 ? prev + 1 : 0));
       }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [lightboxOpen]);
+  }, [lightboxOpen, sliderPhotos.length]);
+
+  // Tải danh sách ảnh cưới (lưu trên S3, URL lấy từ MongoDB qua BE)
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/photos`)
+      .then((res) => res.json())
+      .then((json) => {
+        if (!json.success || !Array.isArray(json.data) || json.data.length === 0) return;
+        const photos = json.data;
+
+        const slider = photos
+          .filter((p) => Array.isArray(p.tags) && p.tags.includes('slider'))
+          .sort((a, b) => a.order - b.order);
+        if (slider.length > 0) setSliderPhotos(slider);
+
+        const hero = photos.find((p) => Array.isArray(p.tags) && p.tags.includes('hero'));
+        if (hero) setHeroPhotoUrl(hero.url);
+
+        const groom = photos.find((p) => Array.isArray(p.tags) && p.tags.includes('groom'));
+        if (groom) setGroomPhotoUrl(groom.url);
+
+        const bride = photos.find((p) => Array.isArray(p.tags) && p.tags.includes('bride'));
+        if (bride) setBridePhotoUrl(bride.url);
+      })
+      .catch((err) => console.error('Lỗi tải ảnh:', err));
+  }, []);
 
   // Kết nối Backend REST API và WebSocket Realtime (Cổng 8080)
   useEffect(() => {
@@ -484,7 +520,7 @@ export default function WeddingPage() {
               }}
             >
               <img
-                src="/photos/DSC_1220.jpg"
+                src={heroPhotoUrl}
                 alt="Vũ Đức An & Đinh Thị Bích Thủy"
                 style={{
                   width: '100%',
@@ -586,7 +622,7 @@ export default function WeddingPage() {
               <div style={{ width: '220px', height: '280px', margin: '0 auto 16px' }}>
                 <div className="arch-frame" style={{ width: '100%', height: '100%', border: '3px solid #ede3d1' }}>
                   <img
-                    src="/photos/DSC_1415.jpg"
+                    src={groomPhotoUrl}
                     alt="Chú rể Vũ Đức An"
                     style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 15%' }}
                   />
@@ -612,7 +648,7 @@ export default function WeddingPage() {
               <div style={{ width: '220px', height: '280px', margin: '0 auto 16px' }}>
                 <div className="arch-frame" style={{ width: '100%', height: '100%', border: '3px solid #ede3d1' }}>
                   <img
-                    src="/photos/DSC_1332.jpg"
+                    src={bridePhotoUrl}
                     alt="Cô dâu Đinh Thị Bích Thủy"
                     style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 15%' }}
                   />
@@ -798,8 +834,8 @@ export default function WeddingPage() {
             onTouchEnd={handleSlideTouchEnd}
           >
             <div className="photo-slider-track">
-              {ALL_PHOTOS.map((src, idx) => {
-                const count = ALL_PHOTOS.length;
+              {sliderPhotos.map((photo, idx) => {
+                const count = sliderPhotos.length;
                 let d = idx - sliderIndex;
                 if (d > count / 2) d -= count;
                 if (d < -count / 2) d += count;
@@ -828,7 +864,7 @@ export default function WeddingPage() {
                       pointerEvents: abs <= 1 ? 'auto' : 'none',
                     }}
                   >
-                    <img src={src} alt={`Ảnh cưới ${idx + 1}`} loading="lazy" />
+                    <img src={photo.url} alt={`Ảnh cưới ${idx + 1}`} loading="lazy" />
                     {isCenter && (
                       <div className="photo-slide-hint">
                         <span>✦ Nhấn để xem toàn màn hình ✦</span>
@@ -859,7 +895,7 @@ export default function WeddingPage() {
 
           {/* Chấm điều hướng */}
           <div className="photo-slider-dots">
-            {ALL_PHOTOS.map((_, idx) => (
+            {sliderPhotos.map((_, idx) => (
               <button
                 key={idx}
                 type="button"
@@ -1328,7 +1364,7 @@ export default function WeddingPage() {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              setCurrentPhotoIdx((prev) => (prev > 0 ? prev - 1 : ALL_PHOTOS.length - 1));
+              setCurrentPhotoIdx((prev) => (prev > 0 ? prev - 1 : sliderPhotos.length - 1));
             }}
             style={{
               position: 'absolute',
@@ -1352,7 +1388,7 @@ export default function WeddingPage() {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              setCurrentPhotoIdx((prev) => (prev < ALL_PHOTOS.length - 1 ? prev + 1 : 0));
+              setCurrentPhotoIdx((prev) => (prev < sliderPhotos.length - 1 ? prev + 1 : 0));
             }}
             style={{
               position: 'absolute',
@@ -1385,7 +1421,7 @@ export default function WeddingPage() {
           >
             <img
               key={currentPhotoIdx}
-              src={ALL_PHOTOS[currentPhotoIdx]}
+              src={sliderPhotos[currentPhotoIdx]?.url}
               alt="Ảnh cưới phóng to"
               className="lightbox-image"
               style={{
@@ -1397,7 +1433,7 @@ export default function WeddingPage() {
               }}
             />
             <span style={{ color: '#ffffff', fontSize: '13px', marginTop: '12px', letterSpacing: '0.1em' }}>
-              {currentPhotoIdx + 1} / {ALL_PHOTOS.length}
+              {currentPhotoIdx + 1} / {sliderPhotos.length}
             </span>
           </div>
         </div>

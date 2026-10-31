@@ -10,6 +10,7 @@ const setupWishSocket = require('./sockets/wishSocket');
 const wishRoutes = require('./routes/wishRoutes');
 const rsvpRoutes = require('./routes/rsvpRoutes');
 const infoRoutes = require('./routes/infoRoutes');
+const photoRoutes = require('./routes/photoRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -34,6 +35,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/wishes', wishRoutes);
 app.use('/api/rsvp', rsvpRoutes);
 app.use('/api/info', infoRoutes);
+app.use('/api/photos', photoRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
