@@ -12,9 +12,9 @@ Actions runner, sau đó SSH vào EC2 để:
 | Secret | Giá trị |
 |---|---|
 | `EC2_HOST` | IP hoặc domain public của EC2 |
-| `EC2_USER` | User SSH, ví dụ `ubuntu` |
+| `EC2_USER` | User SSH, ví dụ `ec2-user` (Amazon Linux) |
 | `EC2_SSH_KEY` | Toàn bộ nội dung file `.pem` (private key) dùng để SSH vào EC2 |
-| `EC2_APP_DIR` | Đường dẫn repo backend trên EC2, ví dụ `/home/ubuntu/wedding` |
+| `EC2_APP_DIR` | Đường dẫn repo backend trên EC2, ví dụ `/home/ec2-user/wedding` |
 
 ## 2. GitHub Variable (Settings → Secrets and variables → Actions → Variables)
 
@@ -30,8 +30,11 @@ git clone https://github.com/anvd15/wedding.git ~/wedding
 cd ~/wedding
 docker compose up -d --build   # kiểm tra chạy được lần đầu
 
-# Cài Node + pm2 để chạy frontend standalone
-sudo apt-get install -y nodejs npm   # nếu EC2 chưa có Node
+# Cài Node + pm2 để chạy frontend standalone (nếu EC2 chưa có Node)
+# Amazon Linux 2023:
+sudo dnf install -y nodejs npm
+# Amazon Linux 2 (nếu dnf không có):
+# sudo yum install -y nodejs npm
 sudo npm install -g pm2
 pm2 startup   # làm theo hướng dẫn in ra để pm2 tự chạy lại khi reboot
 ```
