@@ -58,7 +58,7 @@ jobs:
             docker compose up -d --build
             docker image prune -f
 
-      - name: Deploy frontend (pm2) on EC2
+      - name: Deploy frontend (systemd) on EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -66,13 +66,11 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             set -e
-            rm -rf ~/frontend-new
-            mkdir -p ~/frontend-new
-            tar -xzf ~/frontend-dist.tar.gz -C ~/frontend-new
-            rm -rf ~/frontend-old
-            [ -d ~/frontend ] && mv ~/frontend ~/frontend-old || true
-            mv ~/frontend-new ~/frontend
-            pm2 delete wedding-frontend 2>/dev/null || true
-            PORT=3000 pm2 start ~/frontend/server.js --name wedding-frontend
-            pm2 save
-            rm -rf ~/frontend-old ~/frontend-dist.tar.gz
+            sudo systemctl stop wedding-frontend
+            rm -rf ~/wedding-frontend-new
+            mkdir -p ~/wedding-frontend-new
+            tar -xzf ~/frontend-dist.tar.gz -C ~/wedding-frontend-new
+            rm -rf ~/wedding-frontend
+            mv ~/wedding-frontend-new ~/wedding-frontend
+            sudo systemctl start wedding-frontend
+            rm -f ~/frontend-dist.tar.gz
