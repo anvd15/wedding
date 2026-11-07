@@ -33,6 +33,10 @@ const FALLBACK_GROOM_PHOTO = '/photos/DSC_1415.jpg';
 const FALLBACK_BRIDE_PHOTO = '/photos/DSC_1332.jpg';
 
 export default function WeddingPage() {
+  // Trạng thái màn hình "thiệp đóng" (envelope cover) hiển thị khi vào trang
+  const [inviteOpened, setInviteOpened] = useState(false);
+  const [isOpeningInvite, setIsOpeningInvite] = useState(false);
+
   // Trạng thái âm nhạc
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef(null);
@@ -97,6 +101,21 @@ export default function WeddingPage() {
       window.removeEventListener('touchstart', handleFirstInteraction);
     };
   }, [isPlaying]);
+
+  // Khoá cuộn trang khi màn hình thiệp đóng còn hiển thị
+  useEffect(() => {
+    document.body.style.overflow = inviteOpened ? '' : 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [inviteOpened]);
+
+  // Mở thiệp: chạy hiệu ứng (phong bì mở ra) rồi mới lộ nội dung chính
+  const handleOpenInvite = () => {
+    if (isOpeningInvite || inviteOpened) return;
+    setIsOpeningInvite(true);
+    setTimeout(() => setInviteOpened(true), 1550);
+  };
 
   const toggleMusic = () => {
     if (!audioRef.current) return;
@@ -436,6 +455,46 @@ export default function WeddingPage() {
 
   return (
     <>
+      {/* ─── MÀN HÌNH THIỆP ĐÓNG (bấm để mở thiệp cưới) ─── */}
+      {!inviteOpened && (
+        <div className={`invite-cover${isOpeningInvite ? ' invite-cover-opening' : ''}`}>
+          <div className="invite-cover-inner">
+            <Heart size={18} className="invite-cover-deco invite-cover-deco-1 heart-beat" />
+            <Heart size={14} className="invite-cover-deco invite-cover-deco-2 heart-beat" />
+
+            <span className="font-royal invite-cover-label">TRÂN TRỌNG KÍNH MỜI</span>
+
+            <div
+              className={`envelope${isOpeningInvite ? ' is-opening' : ''}`}
+              role="button"
+              tabIndex={0}
+              aria-label="Nhấn để mở thiệp cưới"
+              onClick={handleOpenInvite}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') handleOpenInvite();
+              }}
+            >
+              <div className="envelope-back">
+                <div className="envelope-card">
+                  <span className="font-script gold-text-gradient envelope-card-amp">&amp;</span>
+                  <h2 className="font-serif envelope-card-names">
+                    Đức An
+                    <br />
+                    Bích Thủy
+                  </h2>
+                </div>
+              </div>
+              <div className="envelope-flap" />
+              <div className="envelope-seal">
+                <Heart size={20} fill="#ffffff" color="#ffffff" />
+              </div>
+            </div>
+
+            <p className="font-serif invite-cover-hint">✦ Nhấn vào thiệp để mở ✦</p>
+          </div>
+        </div>
+      )}
+
       {/* Cánh hoa rơi toàn màn hình */}
       <canvas id="petals-canvas" />
 
@@ -622,7 +681,7 @@ export default function WeddingPage() {
               <div style={{ width: '220px', height: '280px', margin: '0 auto 16px' }}>
                 <div className="arch-frame" style={{ width: '100%', height: '100%', border: '3px solid #ede3d1' }}>
                   <img
-                    src={groomPhotoUrl}
+                    src={bridePhotoUrl}
                     alt="Chú rể Vũ Đức An"
                     style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 15%' }}
                   />
@@ -648,7 +707,7 @@ export default function WeddingPage() {
               <div style={{ width: '220px', height: '280px', margin: '0 auto 16px' }}>
                 <div className="arch-frame" style={{ width: '100%', height: '100%', border: '3px solid #ede3d1' }}>
                   <img
-                    src={bridePhotoUrl}
+                    src={groomPhotoUrl}
                     alt="Cô dâu Đinh Thị Bích Thủy"
                     style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 15%' }}
                   />
@@ -932,7 +991,7 @@ export default function WeddingPage() {
                   </span>
                 </div>
                 <p style={{ fontSize: '13px', color: '#887d72', marginBottom: '10px' }}>
-                  ⏰ 09:00 - Chủ Nhật, Ngày 29 Tháng 11 Năm 2026
+                  ⏰ 14:30 - Chủ Nhật, Ngày 29 Tháng 11 Năm 2026
                 </p>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '13px', color: '#554f49', marginBottom: '12px' }}>
                   <MapPin size={16} style={{ color: '#c59b48', flexShrink: 0, marginTop: '2px' }} />
@@ -958,7 +1017,7 @@ export default function WeddingPage() {
                   </span>
                 </div>
                 <p style={{ fontSize: '13px', color: '#887d72', marginBottom: '10px' }}>
-                  ⏰ 11:00 - Chủ Nhật, Ngày 29 Tháng 11 Năm 2026
+                  ⏰ 15:00 - Chủ Nhật, Ngày 29 Tháng 11 Năm 2026
                 </p>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '13px', color: '#554f49', marginBottom: '12px' }}>
                   <MapPin size={16} style={{ color: '#c59b48', flexShrink: 0, marginTop: '2px' }} />

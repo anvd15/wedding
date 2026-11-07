@@ -474,6 +474,187 @@ body {
   100% { box-shadow: 0 0 0 16px rgba(197, 155, 72, 0); background-color: #faf6f0; border-color: #ece2d2; }
 }
 
+/* ─── Màn hình "thiệp đóng" (envelope cover) hiển thị khi vào trang ─── */
+.invite-cover {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 22%, #fffaf0 0%, #faf2e2 45%, #f3e6c9 100%);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+  transition-delay: 0.75s;
+}
+
+.invite-cover::before {
+  content: '';
+  position: absolute;
+  inset: 14px;
+  border: 1.5px solid rgba(197, 155, 72, 0.45);
+  border-radius: 18px;
+  pointer-events: none;
+}
+
+.invite-cover-opening {
+  opacity: 0;
+  transform: scale(1.06);
+  pointer-events: none;
+}
+
+.invite-cover-inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  padding: 24px;
+  text-align: center;
+}
+
+.invite-cover-label {
+  font-size: 13px;
+  letter-spacing: 0.3em;
+  color: var(--color-gold-dark);
+  font-weight: 600;
+}
+
+.invite-cover-deco {
+  position: absolute;
+  color: var(--color-gold);
+  fill: var(--color-gold);
+  opacity: 0.55;
+}
+
+.invite-cover-deco-1 {
+  top: -18px;
+  left: -26px;
+}
+
+.invite-cover-deco-2 {
+  bottom: -6px;
+  right: -22px;
+  animation-delay: 0.4s;
+}
+
+.envelope {
+  position: relative;
+  width: 240px;
+  height: 168px;
+  perspective: 1200px;
+  cursor: pointer;
+}
+
+.envelope-back {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, #ffffff 0%, #fbf5e8 100%);
+  border: 2px solid var(--color-gold);
+  border-radius: 10px;
+  box-shadow: 0 20px 44px rgba(184, 138, 50, 0.28);
+  overflow: hidden;
+}
+
+.envelope-card {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  width: 84%;
+  transform: translateX(-50%);
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 16px 8px 12px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+  transition: transform 0.7s cubic-bezier(0.22, 0.8, 0.25, 1) 0.2s, opacity 0.6s ease 0.2s;
+  z-index: 1;
+}
+
+.envelope-card-amp {
+  font-size: 22px;
+  line-height: 1;
+  display: block;
+}
+
+.envelope-card-names {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--color-text-main);
+  text-transform: uppercase;
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+.envelope-flap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 54%;
+  background: linear-gradient(145deg, #f7e7c4 0%, #d4aa55 60%, #b88a32 100%);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  border-radius: 10px 10px 0 0;
+  transform-origin: top center;
+  transform: rotateX(0deg);
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  transition: transform 0.85s cubic-bezier(0.45, 0, 0.2, 1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  z-index: 3;
+}
+
+.envelope-seal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #d4aa55 0%, #b88a32 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 6px 18px rgba(184, 138, 50, 0.45);
+  z-index: 4;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.envelope.is-opening .envelope-flap {
+  transform: rotateX(-170deg);
+}
+
+.envelope.is-opening .envelope-seal {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.4);
+}
+
+.envelope.is-opening .envelope-card {
+  transform: translate(-50%, -128px) scale(1.04);
+  opacity: 0;
+}
+
+.invite-cover-hint {
+  font-size: 13px;
+  font-style: italic;
+  color: var(--color-text-muted);
+  letter-spacing: 0.04em;
+  animation: hintPulse 2.2s ease-in-out infinite;
+}
+
+@keyframes hintPulse {
+  0%, 100% { opacity: 0.6; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(-2px); }
+}
+
+@media (max-width: 420px) {
+  .envelope {
+    width: 210px;
+    height: 148px;
+  }
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
