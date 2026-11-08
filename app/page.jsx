@@ -21,12 +21,12 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.anvd.dev';
 
 // Ảnh local dùng tạm trong lúc chờ API /api/photos trả dữ liệu (hoặc khi API lỗi)
 const FALLBACK_SLIDER_PHOTOS = [
-  '/photos/DSC_1220.jpg',
-  '/photos/DSC_1332.jpg',
-  '/photos/DSC_1415.jpg',
-  '/photos/DSC_1677.jpg',
-  '/photos/DSC_1924.jpg',
-  '/photos/DSC_2268.jpg',
+  '/photos/slide-01.jpg',
+  '/photos/slide-02.jpg',
+  '/photos/slide-03.jpg',
+  '/photos/slide-04.jpg',
+  '/photos/slide-05.jpg',
+  '/photos/slide-06.jpg',
 ];
 const FALLBACK_HERO_PHOTO = '/photos/DSC_1220.jpg';
 const FALLBACK_GROOM_PHOTO = '/photos/DSC_1415.jpg';
@@ -681,7 +681,7 @@ export default function WeddingPage() {
               <div style={{ width: '220px', height: '280px', margin: '0 auto 16px' }}>
                 <div className="arch-frame" style={{ width: '100%', height: '100%', border: '3px solid #ede3d1' }}>
                   <img
-                    src={bridePhotoUrl}
+                    src="/photos/DSC_2011.jpg"
                     alt="Chú rể Vũ Đức An"
                     style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 15%' }}
                   />
