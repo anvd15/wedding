@@ -32,6 +32,69 @@ const FALLBACK_HERO_PHOTO = '/photos/DSC_1220.jpg';
 const FALLBACK_GROOM_PHOTO = '/photos/DSC_1415.jpg';
 const FALLBACK_BRIDE_PHOTO = '/photos/DSC_1332.jpg';
 
+// Theo dõi khi phần tử trượt vào khung nhìn (chỉ kích hoạt hiệu ứng 1 lần)
+function useInView() {
+  const ref = useRef(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof IntersectionObserver === 'undefined') {
+      setInView(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.2, rootMargin: '0px 0px -8% 0px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return [ref, inView];
+}
+
+// Khối nội dung trượt + mờ dần vào khi cuộn tới (variant: 'up' | 'left' | 'right')
+function Reveal({ as: Tag = 'div', className = '', style, children, delay = 0, variant = 'up', ...rest }) {
+  const [ref, inView] = useInView();
+  const variantClass = variant !== 'up' ? ` reveal-block-${variant}` : '';
+  return (
+    <Tag
+      ref={ref}
+      className={`reveal-block${variantClass}${inView ? ' is-in' : ''}${className ? ' ' + className : ''}`}
+      style={{ transitionDelay: inView ? `${delay}ms` : '0ms', ...style }}
+      {...rest}
+    >
+      {children}
+    </Tag>
+  );
+}
+
+// Hiệu ứng "nhảy chữ": từng ký tự bật lên khi cuộn tới, dùng cho các tiêu đề ngắn
+function RevealText({ as: Tag = 'span', text, className = '', style, delay = 0 }) {
+  const [ref, inView] = useInView();
+  const chars = String(text).split('');
+  return (
+    <Tag ref={ref} className={`reveal-text${className ? ' ' + className : ''}`} style={style} aria-label={text}>
+      {chars.map((ch, i) => (
+        <span
+          key={i}
+          className={`reveal-char${inView ? ' is-in' : ''}`}
+          style={{ animationDelay: `${delay + i * 40}ms` }}
+          aria-hidden="true"
+        >
+          {ch === ' ' ? ' ' : ch}
+        </span>
+      ))}
+    </Tag>
+  );
+}
+
 export default function WeddingPage() {
   // Trạng thái màn hình "thiệp đóng" (envelope cover) hiển thị khi vào trang
   const [inviteOpened, setInviteOpened] = useState(false);
@@ -546,13 +609,16 @@ export default function WeddingPage() {
           }}
         >
           <div style={{ marginBottom: '16px' }}>
-            <span
+            <RevealText
+              as="span"
+              text="Save"
               className="font-script gold-text-gradient"
               style={{ fontSize: '38px', lineHeight: '1', display: 'block' }}
-            >
-              Save
-            </span>
-            <span
+            />
+            <RevealText
+              as="span"
+              text="THE DATE"
+              delay={280}
               className="font-royal"
               style={{
                 fontSize: '15px',
@@ -562,13 +628,11 @@ export default function WeddingPage() {
                 display: 'block',
                 marginTop: '4px',
               }}
-            >
-              THE DATE
-            </span>
+            />
           </div>
 
           {/* Khung vòm Arch lớn chứa ảnh cưới đẹp nhất */}
-          <div style={{ margin: '20px auto 26px', maxWidth: '380px' }}>
+          <Reveal style={{ margin: '20px auto 26px', maxWidth: '380px' }}>
             <div
               className="arch-frame"
               style={{
@@ -589,10 +653,10 @@ export default function WeddingPage() {
                 }}
               />
             </div>
-          </div>
+          </Reveal>
 
           {/* Ngày cưới lớn */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', margin: '20px 0 16px' }}>
+          <Reveal delay={100} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', margin: '20px 0 16px' }}>
             <div style={{ height: '1px', width: '45px', background: 'linear-gradient(90deg, transparent, #c59b48)' }} />
             <div style={{ textAlign: 'center' }}>
               <span className="font-royal" style={{ fontSize: '13px', letterSpacing: '0.2em', color: '#7a7065', display: 'block' }}>
@@ -606,14 +670,14 @@ export default function WeddingPage() {
               </span>
             </div>
             <div style={{ height: '1px', width: '45px', background: 'linear-gradient(90deg, #c59b48, transparent)' }} />
-          </div>
+          </Reveal>
 
           <p className="font-serif" style={{ fontSize: '13px', fontStyle: 'italic', color: '#9e721d', margin: '-6px 0 0' }}>
             (Nhằm ngày 21 tháng 10 Âm lịch)
           </p>
 
           {/* Tên Chú rể & Cô dâu */}
-          <div style={{ margin: '14px 0 8px' }}>
+          <Reveal delay={120} style={{ margin: '14px 0 8px' }}>
             <h1
               className="font-serif"
               style={{
@@ -644,10 +708,10 @@ export default function WeddingPage() {
             >
               ĐINH THỊ BÍCH THỦY
             </h1>
-          </div>
+          </Reveal>
 
           {/* Địa điểm cưới */}
-          <div style={{ marginTop: '24px', padding: '16px 20px', borderRadius: '16px', background: '#faf5ed', border: '1px solid #ede3d1' }}>
+          <Reveal delay={160} style={{ marginTop: '24px', padding: '16px 20px', borderRadius: '16px', background: '#faf5ed', border: '1px solid #ede3d1' }}>
             <span className="font-royal" style={{ fontSize: '14px', fontWeight: '700', letterSpacing: '0.15em', color: '#916b24', display: 'block' }}>
               NHÀ THỜ GIÁO XỨ PHÚ MỸ
             </span>
@@ -657,27 +721,34 @@ export default function WeddingPage() {
             <p style={{ fontSize: '13px', color: '#686058', marginTop: '6px', lineHeight: '1.5' }}>
               Giáo xứ Phú Mỹ, xã Phú Xuyên, thành phố Hà Nội
             </p>
-          </div>
+          </Reveal>
         </section>
 
 
         {/* ─── SECTION 2: WEDDING OF (GIỚI THIỆU CÔ DÂU & CHÚ RỂ) ─── */}
         <section style={{ padding: '45px 24px', textAlign: 'center', backgroundColor: '#ffffff' }}>
-          <span className="font-royal" style={{ fontSize: '13px', letterSpacing: '0.3em', color: '#9e721d', textTransform: 'uppercase' }}>
-            Wedding
-          </span>
-          <span className="font-script gold-text-gradient" style={{ fontSize: '50px', display: 'block', lineHeight: '1', margin: '2px 0 10px' }}>
-            of
-          </span>
+          <RevealText
+            as="span"
+            text="Wedding"
+            className="font-royal"
+            style={{ fontSize: '13px', letterSpacing: '0.3em', color: '#9e721d', textTransform: 'uppercase' }}
+          />
+          <RevealText
+            as="span"
+            text="of"
+            delay={320}
+            className="font-script gold-text-gradient"
+            style={{ fontSize: '50px', display: 'block', lineHeight: '1', margin: '2px 0 10px' }}
+          />
 
-          <p className="font-serif" style={{ fontSize: '14px', fontStyle: 'italic', color: '#5e5650', maxWidth: '380px', margin: '0 auto 35px', lineHeight: '1.8' }}>
+          <Reveal as="p" delay={80} className="font-serif" style={{ fontSize: '14px', fontStyle: 'italic', color: '#5e5650', maxWidth: '380px', margin: '0 auto 35px', lineHeight: '1.8' }}>
             &ldquo;Hôm nay không chỉ là ngày chúng mình trở thành vợ chồng, mà còn là ngày bắt đầu một hành trình mới. Mong rằng những năm tháng sau này, chúng mình vẫn luôn chọn nhau, yêu thương nhau và cùng nhau đi thật lâu.&rdquo;
-          </p>
+          </Reveal>
 
           {/* Cặp đôi Chú rể & Cô dâu */}
           <div className="couple-container" style={{ margin: '30px auto' }}>
             {/* Chú rể */}
-            <div style={{ flex: '1', maxWidth: '300px' }}>
+            <Reveal variant="left" style={{ flex: '1', maxWidth: '300px' }}>
               <div style={{ width: '220px', height: '280px', margin: '0 auto 16px' }}>
                 <div className="arch-frame" style={{ width: '100%', height: '100%', border: '3px solid #ede3d1' }}>
                   <img
@@ -694,16 +765,16 @@ export default function WeddingPage() {
               <p style={{ fontSize: '13px', color: '#7a7065', fontStyle: 'italic', marginTop: '4px' }}>
                 Chàng trai chân thành, ấm áp và luôn dành trọn sự yêu thương
               </p>
-            </div>
+            </Reveal>
 
             {/* Icon trái tim nối giữa hai người */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px 0' }}>
+            <Reveal delay={200} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px 0' }}>
               <Heart size={26} className="heart-beat" style={{ color: '#c59b48', fill: '#c59b48' }} />
               <span className="font-script gold-text-gradient" style={{ fontSize: '26px' }}>Forever</span>
-            </div>
+            </Reveal>
 
             {/* Cô dâu */}
-            <div style={{ flex: '1', maxWidth: '300px' }}>
+            <Reveal variant="right" style={{ flex: '1', maxWidth: '300px' }}>
               <div style={{ width: '220px', height: '280px', margin: '0 auto 16px' }}>
                 <div className="arch-frame" style={{ width: '100%', height: '100%', border: '3px solid #ede3d1' }}>
                   <img
@@ -720,14 +791,14 @@ export default function WeddingPage() {
               <p style={{ fontSize: '13px', color: '#7a7065', fontStyle: 'italic', marginTop: '4px' }}>
                 Cô gái ngọt ngào, dịu dàng với nụ cười luôn tỏa nắng
               </p>
-            </div>
+            </Reveal>
           </div>
 
-          <div style={{ marginTop: '30px', padding: '16px', background: '#faf6f0', borderRadius: '16px' }}>
+          <Reveal style={{ marginTop: '30px', padding: '16px', background: '#faf6f0', borderRadius: '16px' }}>
             <p style={{ fontSize: '13px', color: '#686058', lineHeight: '1.7' }}>
               Cùng gia đình hai bên, chúng mình rất vui khi được mời bạn đến chung vui trong ngày đặc biệt này.
             </p>
-          </div>
+          </Reveal>
         </section>
 
 
@@ -740,15 +811,17 @@ export default function WeddingPage() {
             color: '#ffffff',
           }}
         >
-          <span className="font-script gold-text-gradient" style={{ fontSize: '38px', lineHeight: '1' }}>
-            Our
-          </span>
-          <h2 className="font-royal" style={{ fontSize: '18px', letterSpacing: '0.25em', color: '#f7e7c4', marginTop: '2px' }}>
-            SPECIAL DAY
-          </h2>
-          <p style={{ fontSize: '13px', color: '#b8aba0', margin: '8px auto 26px', maxWidth: '340px', fontStyle: 'italic' }}>
+          <RevealText as="span" text="Our" className="font-script gold-text-gradient" style={{ fontSize: '38px', lineHeight: '1' }} />
+          <RevealText
+            as="h2"
+            text="SPECIAL DAY"
+            delay={260}
+            className="font-royal"
+            style={{ fontSize: '18px', letterSpacing: '0.25em', color: '#f7e7c4', marginTop: '2px' }}
+          />
+          <Reveal as="p" delay={80} style={{ fontSize: '13px', color: '#b8aba0', margin: '8px auto 26px', maxWidth: '340px', fontStyle: 'italic' }}>
             &ldquo;A lifetime of love begins here.&rdquo;
-          </p>
+          </Reveal>
 
           {/* Đồng hồ đếm ngược 4 ô */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', maxWidth: '380px', margin: '0 auto' }}>
@@ -758,8 +831,9 @@ export default function WeddingPage() {
               { label: 'PHÚT', val: countdown.minutes },
               { label: 'GIÂY', val: countdown.seconds },
             ].map((item, idx) => (
-              <div
+              <Reveal
                 key={idx}
+                delay={idx * 90}
                 style={{
                   background: 'rgba(255, 255, 255, 0.06)',
                   border: '1px solid rgba(212, 170, 85, 0.35)',
@@ -774,7 +848,7 @@ export default function WeddingPage() {
                 <span style={{ fontSize: '10px', letterSpacing: '0.15em', color: '#d1c5b8', marginTop: '6px', display: 'block' }}>
                   {item.label}
                 </span>
-              </div>
+              </Reveal>
             ))}
           </div>
         </section>
@@ -782,18 +856,21 @@ export default function WeddingPage() {
 
         {/* ─── SECTION 4: SAVE THE DAY / CALENDAR ─── */}
         <section style={{ padding: '45px 24px', textAlign: 'center', backgroundColor: '#fcfaf6' }}>
-          <span className="font-script gold-text-gradient" style={{ fontSize: '40px', lineHeight: '1' }}>
-            Save
-          </span>
-          <h2 className="font-royal" style={{ fontSize: '18px', letterSpacing: '0.25em', color: '#2a2522', marginTop: '2px' }}>
-            THE DAY
-          </h2>
-          <p style={{ fontSize: '13px', color: '#7a7065', fontStyle: 'italic', margin: '6px auto 24px', maxWidth: '340px' }}>
+          <RevealText as="span" text="Save" className="font-script gold-text-gradient" style={{ fontSize: '40px', lineHeight: '1' }} />
+          <RevealText
+            as="h2"
+            text="THE DAY"
+            delay={280}
+            className="font-royal"
+            style={{ fontSize: '18px', letterSpacing: '0.25em', color: '#2a2522', marginTop: '2px' }}
+          />
+          <Reveal as="p" delay={80} style={{ fontSize: '13px', color: '#7a7065', fontStyle: 'italic', margin: '6px auto 24px', maxWidth: '340px' }}>
             &ldquo;Hãy lưu lại ngày đặc biệt và cùng chúng mình đón mừng khoảnh khắc trọng đại này nhé.&rdquo;
-          </p>
+          </Reveal>
 
           {/* Lịch tháng 11/2026 */}
-          <div
+          <Reveal
+            delay={150}
             style={{
               maxWidth: '360px',
               margin: '0 auto',
@@ -868,24 +945,27 @@ export default function WeddingPage() {
                 );
               })}
             </div>
-          </div>
+          </Reveal>
         </section>
 
 
         {/* ─── SECTION 5: ALBUM ẢNH CƯỚI (PHOTO GALLERY) ─── */}
         <section style={{ padding: '45px 20px', backgroundColor: '#ffffff', textAlign: 'center' }}>
-          <span className="font-script gold-text-gradient" style={{ fontSize: '42px', lineHeight: '1' }}>
-            yêu thương
-          </span>
-          <h2 className="font-royal" style={{ fontSize: '18px', letterSpacing: '0.25em', color: '#231f20', marginTop: '2px' }}>
-            OUR LOVE STORY
-          </h2>
-          <p style={{ fontSize: '13px', color: '#7a7065', fontStyle: 'italic', margin: '6px auto 26px', maxWidth: '340px' }}>
+          <RevealText as="span" text="yêu thương" className="font-script gold-text-gradient" style={{ fontSize: '42px', lineHeight: '1' }} />
+          <RevealText
+            as="h2"
+            text="OUR LOVE STORY"
+            delay={360}
+            className="font-royal"
+            style={{ fontSize: '18px', letterSpacing: '0.25em', color: '#231f20', marginTop: '2px' }}
+          />
+          <Reveal as="p" delay={80} style={{ fontSize: '13px', color: '#7a7065', fontStyle: 'italic', margin: '6px auto 26px', maxWidth: '340px' }}>
             &ldquo;Our love story continues.&rdquo;
-          </p>
+          </Reveal>
 
           {/* Slide ảnh kiểu coverflow: ảnh giữa nổi bật, 2 bên hé lộ mờ dần */}
-          <div
+          <Reveal
+            delay={150}
             className="photo-slider"
             onMouseEnter={() => setSliderPaused(true)}
             onMouseLeave={() => setSliderPaused(false)}
@@ -950,7 +1030,7 @@ export default function WeddingPage() {
             >
               <ChevronRight size={22} />
             </button>
-          </div>
+          </Reveal>
 
           {/* Chấm điều hướng */}
           <div className="photo-slider-dots">
@@ -969,21 +1049,23 @@ export default function WeddingPage() {
 
         {/* ─── SECTION 6: SỰ KIỆN & LỊCH TRÌNH CƯỚI (TIMELINE) ─── */}
         <section style={{ padding: '45px 24px', backgroundColor: '#fcf9f5', textAlign: 'center' }}>
-          <span className="font-script gold-text-gradient" style={{ fontSize: '40px', lineHeight: '1' }}>
-            Wedding
-          </span>
-          <h2 className="font-royal" style={{ fontSize: '18px', letterSpacing: '0.25em', color: '#231f20', marginTop: '2px' }}>
-            SỰ KIỆN CƯỚI
-          </h2>
-          <p style={{ fontSize: '13px', color: '#7a7065', margin: '6px auto 30px' }}>
+          <RevealText as="span" text="Wedding" className="font-script gold-text-gradient" style={{ fontSize: '40px', lineHeight: '1' }} />
+          <RevealText
+            as="h2"
+            text="SỰ KIỆN CƯỚI"
+            delay={320}
+            className="font-royal"
+            style={{ fontSize: '18px', letterSpacing: '0.25em', color: '#231f20', marginTop: '2px' }}
+          />
+          <Reveal as="p" delay={80} style={{ fontSize: '13px', color: '#7a7065', margin: '6px auto 30px' }}>
             Thông tin chi tiết về các buổi lễ &amp; tiệc cưới
-          </p>
+          </Reveal>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
             {/* 2 Lễ xếp 2 cột khi màn hình rộng */}
             <div className="two-col-grid">
               {/* Lễ Vu Quy */}
-              <div className="bank-card" style={{ textAlign: 'left', position: 'relative' }}>
+              <Reveal as="div" variant="left" className="bank-card" style={{ textAlign: 'left', position: 'relative' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
                   <Clock size={18} style={{ color: '#c59b48' }} />
                   <span className="font-serif" style={{ fontSize: '18px', fontWeight: '700', color: '#231f20' }}>
@@ -1006,10 +1088,10 @@ export default function WeddingPage() {
                 >
                   <MapPin size={15} /> Chỉ đường trên Google Maps
                 </a>
-              </div>
+              </Reveal>
 
               {/* Lễ Thành Hôn */}
-              <div className="bank-card" style={{ textAlign: 'left', position: 'relative' }}>
+              <Reveal as="div" variant="right" className="bank-card" style={{ textAlign: 'left', position: 'relative' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
                   <Clock size={18} style={{ color: '#c59b48' }} />
                   <span className="font-serif" style={{ fontSize: '18px', fontWeight: '700', color: '#231f20' }}>
@@ -1032,7 +1114,7 @@ export default function WeddingPage() {
                 >
                   <MapPin size={15} /> Chỉ đường trên Google Maps
                 </a>
-              </div>
+              </Reveal>
             </div>
           </div>
         </section>
@@ -1040,15 +1122,18 @@ export default function WeddingPage() {
 
         {/* ─── SECTION 7: R.S.V.P (XÁC NHẬN THAM DỰ) ─── */}
         <section style={{ padding: '45px 24px', backgroundColor: '#ffffff', textAlign: 'center' }}>
-          <h2 className="font-royal" style={{ fontSize: '20px', letterSpacing: '0.25em', color: '#231f20' }}>
-            R.S.V.P
-          </h2>
-          <p style={{ fontSize: '13px', color: '#7a7065', fontStyle: 'italic', margin: '6px auto 28px', maxWidth: '340px' }}>
+          <RevealText
+            as="h2"
+            text="R.S.V.P"
+            className="font-royal"
+            style={{ fontSize: '20px', letterSpacing: '0.25em', color: '#231f20' }}
+          />
+          <Reveal as="p" delay={80} style={{ fontSize: '13px', color: '#7a7065', fontStyle: 'italic', margin: '6px auto 28px', maxWidth: '340px' }}>
             &ldquo;Sự hiện diện của bạn là niềm vui của chúng mình. Hãy xác nhận tham dự nhé!&rdquo;
-          </p>
+          </Reveal>
 
           {rsvpSubmitted ? (
-            <div
+            <Reveal
               style={{
                 padding: '30px 20px',
                 borderRadius: '20px',
@@ -1063,9 +1148,9 @@ export default function WeddingPage() {
               <p style={{ fontSize: '13px', color: '#686058' }}>
                 Đức An &amp; Bích Thủy đã nhận được phản hồi của bạn và rất mong chờ được đón tiếp bạn trong ngày vui! 💕
               </p>
-            </div>
+            </Reveal>
           ) : (
-            <form onSubmit={handleRsvpSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px', textAlign: 'left', maxWidth: '560px', margin: '0 auto' }}>
+            <Reveal as="form" delay={150} onSubmit={handleRsvpSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px', textAlign: 'left', maxWidth: '560px', margin: '0 auto' }}>
               <div>
                 <label style={{ fontSize: '12px', fontWeight: '600', color: '#554f49', display: 'block', marginBottom: '6px' }}>
                   Họ và tên của bạn *
@@ -1208,22 +1293,24 @@ export default function WeddingPage() {
               <button type="submit" className="btn-gold" style={{ width: '100%', marginTop: '10px' }}>
                 <Send size={16} /> Gửi xác nhận tham dự
               </button>
-            </form>
+            </Reveal>
           )}
         </section>
 
 
         {/* ─── SECTION 8: SỔ LƯU BÚT (GUESTBOOK / LỜI CHÚC) ─── */}
         <section style={{ padding: '45px 24px', backgroundColor: '#ffffff', textAlign: 'center' }}>
-          <span className="font-script gold-text-gradient" style={{ fontSize: '38px', lineHeight: '1' }}>
-            Gửi gắm
-          </span>
-          <h2 className="font-royal" style={{ fontSize: '18px', letterSpacing: '0.25em', color: '#231f20', marginTop: '2px' }}>
-            LỜI CHÚC PHÚC
-          </h2>
-          <p style={{ fontSize: '13px', color: '#7a7065', fontStyle: 'italic', margin: '6px auto 14px', maxWidth: '340px' }}>
+          <RevealText as="span" text="Gửi gắm" className="font-script gold-text-gradient" style={{ fontSize: '38px', lineHeight: '1' }} />
+          <RevealText
+            as="h2"
+            text="LỜI CHÚC PHÚC"
+            delay={300}
+            className="font-royal"
+            style={{ fontSize: '18px', letterSpacing: '0.25em', color: '#231f20', marginTop: '2px' }}
+          />
+          <Reveal as="p" delay={80} style={{ fontSize: '13px', color: '#7a7065', fontStyle: 'italic', margin: '6px auto 14px', maxWidth: '340px' }}>
             Hãy gửi những lời chúc tốt đẹp nhất đến cặp đôi mới cưới!
-          </p>
+          </Reveal>
 
           {/* Badge Realtime Online */}
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#f5f3ee', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', color: '#554f49', marginBottom: '22px' }}>
@@ -1231,7 +1318,7 @@ export default function WeddingPage() {
             <span>{socketConnected ? `Realtime: ${onlineCount} khách đang online` : 'Đang kết nối Realtime...'}</span>
           </div>
 
-          <form onSubmit={handleAddWish} style={{ textAlign: 'left', marginBottom: '30px', maxWidth: '560px', margin: '0 auto 30px' }}>
+          <Reveal as="form" delay={150} onSubmit={handleAddWish} style={{ textAlign: 'left', marginBottom: '30px', maxWidth: '560px', margin: '0 auto 30px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 140px', gap: '10px', marginBottom: '12px' }}>
               <input
                 type="text"
@@ -1294,10 +1381,11 @@ export default function WeddingPage() {
             >
               <Heart size={16} /> {isSubmittingWish ? 'Đang gửi...' : 'Gửi lời chúc mừng'}
             </button>
-          </form>
+          </Reveal>
 
           {/* Danh sách lời chúc - chạy liên tục dạng băng chuyền, dừng khi tương tác */}
-          <div
+          <Reveal
+            delay={200}
             className="wish-ticker-viewport"
             onMouseEnter={() => setWishTickerPaused(true)}
             onMouseLeave={() => setWishTickerPaused(false)}
@@ -1362,7 +1450,7 @@ export default function WeddingPage() {
                 </div>
               ))}
             </div>
-          </div>
+          </Reveal>
           <p style={{ fontSize: '11px', color: '#a09486', marginTop: '10px' }}>
             ✦ Di chuột hoặc chạm vào để dừng xem lời chúc ✦
           </p>
@@ -1377,19 +1465,17 @@ export default function WeddingPage() {
             background: 'linear-gradient(180deg, #fcf9f5 0%, #ede4d5 100%)',
           }}
         >
-          <span className="font-script gold-text-gradient" style={{ fontSize: '48px', lineHeight: '1' }}>
-            Thank you!
-          </span>
-          <h3 className="font-serif" style={{ fontSize: '20px', fontWeight: '700', letterSpacing: '0.06em', color: '#2a2522', marginTop: '6px' }}>
+          <RevealText as="span" text="Thank you!" className="font-script gold-text-gradient" style={{ fontSize: '48px', lineHeight: '1' }} />
+          <Reveal as="h3" delay={150} className="font-serif" style={{ fontSize: '20px', fontWeight: '700', letterSpacing: '0.06em', color: '#2a2522', marginTop: '6px' }}>
             VŨ ĐỨC AN &amp; ĐINH THỊ BÍCH THỦY
-          </h3>
-          <p style={{ fontSize: '13px', color: '#686058', fontStyle: 'italic', maxWidth: '340px', margin: '10px auto 20px', lineHeight: '1.7' }}>
+          </Reveal>
+          <Reveal as="p" delay={220} style={{ fontSize: '13px', color: '#686058', fontStyle: 'italic', maxWidth: '340px', margin: '10px auto 20px', lineHeight: '1.7' }}>
             &ldquo;Cảm ơn tất cả mọi người đã luôn đồng hành, yêu thương và sẻ chia niềm hạnh phúc to lớn này cùng chúng mình.&rdquo;
-          </p>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: '#916b24', fontSize: '12px' }}>
+          </Reveal>
+          <Reveal delay={280} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: '#916b24', fontSize: '12px' }}>
             <Heart size={14} className="heart-beat" style={{ fill: '#c59b48' }} />
             <span>Forever Love · 29.11.2026</span>
-          </div>
+          </Reveal>
         </footer>
 
       </div>

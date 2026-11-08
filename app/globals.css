@@ -655,6 +655,74 @@ body {
   }
 }
 
+/* ─── Hiệu ứng cuộn: khối nội dung trượt vào + chữ nhảy vào khi xuất hiện ─── */
+.reveal-block {
+  opacity: 0;
+  transform: translateY(42px);
+  transition: opacity 0.8s cubic-bezier(0.22, 0.8, 0.25, 1), transform 0.8s cubic-bezier(0.22, 0.8, 0.25, 1);
+  will-change: transform, opacity;
+}
+
+.reveal-block.is-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-block-left {
+  transform: translateX(-56px);
+}
+
+.reveal-block-left.is-in {
+  transform: translateX(0);
+}
+
+.reveal-block-right {
+  transform: translateX(56px);
+}
+
+.reveal-block-right.is-in {
+  transform: translateX(0);
+}
+
+.reveal-char {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(26px) scale(0.55) rotate(8deg);
+  will-change: transform, opacity;
+}
+
+/* .gold-text-gradient dùng background-clip:text nên không "ăn" xuống span con -
+   tô lại gradient riêng cho từng ký tự khi bọc trong RevealText */
+.reveal-text.gold-text-gradient .reveal-char {
+  background: linear-gradient(120deg, #b88728 0%, #dfb764 50%, #9e721d 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.reveal-char.is-in {
+  animation: charJumpIn 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes charJumpIn {
+  0% { opacity: 0; transform: translateY(26px) scale(0.55) rotate(8deg); }
+  55% { opacity: 1; transform: translateY(-8px) scale(1.12) rotate(-3deg); }
+  80% { transform: translateY(2px) scale(0.98) rotate(1deg); }
+  100% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-block,
+  .reveal-block-left,
+  .reveal-block-right,
+  .reveal-char {
+    transition: none !important;
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
