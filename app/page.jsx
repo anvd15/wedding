@@ -579,7 +579,7 @@ export default function WeddingPage() {
               }}
             >
               <img
-                src={heroPhotoUrl}
+                src="/photos/DSC_2011.jpg"
                 alt="Vũ Đức An & Đinh Thị Bích Thủy"
                 style={{
                   width: '100%',
@@ -681,7 +681,7 @@ export default function WeddingPage() {
               <div style={{ width: '220px', height: '280px', margin: '0 auto 16px' }}>
                 <div className="arch-frame" style={{ width: '100%', height: '100%', border: '3px solid #ede3d1' }}>
                   <img
-                    src="/photos/DSC_2011.jpg"
+                    src="/photos/DSC_1220.jpg"
                     alt="Chú rể Vũ Đức An"
                     style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 15%' }}
                   />
