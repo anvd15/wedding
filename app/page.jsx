@@ -1004,11 +1004,6 @@ export default function WeddingPage() {
                     }}
                   >
                     <img src={photo.url} alt={`Ảnh cưới ${idx + 1}`} loading="lazy" />
-                    {isCenter && (
-                      <div className="photo-slide-hint">
-                        <span>✦ Nhấn để xem toàn màn hình ✦</span>
-                      </div>
-                    )}
                   </div>
                 );
               })}

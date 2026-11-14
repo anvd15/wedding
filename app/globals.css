@@ -127,25 +127,6 @@ body {
     0 42px 70px rgba(30, 20, 5, 0.22);
 }
 
-.photo-slide-hint {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: 10px 8px 12px;
-  text-align: center;
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  color: #ffffff;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(20, 14, 4, 0.55) 100%);
-  opacity: 0;
-  transition: opacity 0.35s ease;
-}
-
-.photo-slide-center:hover .photo-slide-hint {
-  opacity: 1;
-}
-
 .photo-slider-nav {
   position: absolute;
   top: 50%;
