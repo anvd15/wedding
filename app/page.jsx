@@ -296,7 +296,7 @@ export default function WeddingPage() {
     if (sliderPaused) return;
     const interval = setInterval(() => {
       setSliderIndex((prev) => (prev + 1) % sliderPhotos.length);
-    }, 3000);
+    }, 2000);
     return () => clearInterval(interval);
   }, [sliderPaused, sliderPhotos.length]);
 
