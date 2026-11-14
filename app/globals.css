@@ -653,6 +653,24 @@ body {
     width: 210px;
     height: 148px;
   }
+
+  .envelope-flap {
+    height: 48%;
+  }
+
+  .envelope-card {
+    bottom: 6px;
+    padding: 10px 6px 8px;
+  }
+
+  .envelope-card-amp {
+    font-size: 18px;
+  }
+
+  .envelope-card-names {
+    font-size: 11px;
+    margin-top: 1px;
+  }
 }
 
 /* ─── Hiệu ứng cuộn: khối nội dung trượt vào + chữ nhảy vào khi xuất hiện ─── */
